@@ -53,6 +53,22 @@ function love.keypressed(key)
   if key == "escape" then
     love.event.quit()
   end
+  if key == "enter" or key == "return" then
+    if gameState == "start" then
+      gameState = "play"
+    else
+      gameState = "start"
+      ballX = VIRTUAL_WINDOW_WIDTH / 2 - 2
+      ballY = VIRTUAL_WINDOW_HEIGHT / 2 - 2
+
+      ballDX = math.random(2) == 1 and 100 or -100
+      ballDY = math.random(-50, 50) * 1.5
+    end
+  end
+  if key == "space" then
+    ballX = VIRTUAL_WINDOW_WIDTH / 2 - 2
+    ballY = VIRTUAL_WINDOW_HEIGHT / 2 - 2
+  end
 end
 
 function love.update(dt)
@@ -69,23 +85,35 @@ function love.update(dt)
     player2Y = math.min(VIRTUAL_WINDOW_HEIGHT - 20, player2Y + (PADDLE_SPEED * dt))
   end
 
+  -- Ball movement
+  if gameState == "play" then
+    ballX = ballX + ballDX * dt
+    ballY = ballY + ballDY * dt
+  end
 end
 
 function love.draw()
   push:apply('start')
   love.graphics.clear(40/255, 45/255, 52/255, 255/255)
   love.graphics.setFont(smallFont)
-  love.graphics.printf('Hello Pong', 0, 30, VIRTUAL_WINDOW_WIDTH, 'center')
+  if gameState == 'start' then
+    love.graphics.printf('Welcome to Pong!', 0, 10, VIRTUAL_WINDOW_WIDTH, 'center')
+    love.graphics.printf('Press Enter to Start', 0, 20, VIRTUAL_WINDOW_WIDTH, 'center')
+  end
+  if gameState == 'play' then
+    love.graphics.printf('Playing!', 0, 10, VIRTUAL_WINDOW_WIDTH, 'center')
+    love.graphics.printf('Press Enter to Pause', 0, 20, VIRTUAL_WINDOW_WIDTH, 'center')
+  end
 
   love.graphics.setFont(scoreFont)
-  love.graphics.print(tostring(player_1_score), VIRTUAL_WINDOW_WIDTH / 2 - 50, 15)
-  love.graphics.print(tostring(player_2_score), VIRTUAL_WINDOW_WIDTH / 2 + 30, 15)
+  love.graphics.print(tostring(player_1_score), VIRTUAL_WINDOW_WIDTH / 2 - 70, 15)
+  love.graphics.print(tostring(player_2_score), VIRTUAL_WINDOW_WIDTH / 2 + 50, 15)
 
   -- Paddle 1
   love.graphics.rectangle("fill", 10, player1Y, 5, 20)
   -- Paddle 2
   love.graphics.rectangle("fill", VIRTUAL_WINDOW_WIDTH - 10, player2Y, 5, 20)
   -- Ball
-  love.graphics.rectangle("fill", VIRTUAL_WINDOW_WIDTH / 2 - 2, VIRTUAL_WINDOW_HEIGHT / 2 - 2, 4, 4)
+  love.graphics.rectangle("fill", ballX, ballY, 4, 4)
   push:apply('end')
 end
