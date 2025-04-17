@@ -12,6 +12,8 @@ function love.load()
   love.graphics.setDefaultFilter('nearest', 'nearest') -- This helps with the texteure filtering, 
   -- making it look pixelated since the goal is to make it look retro.
 
+  math.randomseed(os.time()) -- This is used to seed the random number generator with the current time.
+
   smallFont = love.graphics.newFont('font.ttf', 8)
 
   scoreFont = love.graphics.newFont("font.ttf", 32)
@@ -29,6 +31,12 @@ function love.load()
   player1Y = 30
   player2Y = VIRTUAL_WINDOW_HEIGHT - 50
 
+  ballX = VIRTUAL_WINDOW_WIDTH / 2 - 2
+  ballY = VIRTUAL_WINDOW_HEIGHT / 2 - 2
+
+  ballDX = math.random(2) == 1 and 100 or -100 -- randomly set the direction of the ball
+  ballDY = math.random(-50, 50) -- randomly set the vertical direction of the ball
+
   -- we transitioned to using the push library for window management to help
   -- with scaling and resolution management, it kind of zooms in to the virtual resolution but
   -- it also allows us to use the normal resolution for the window
@@ -37,6 +45,8 @@ function love.load()
   --   resizable = false,
   --   vsync = true
   -- })
+
+  gameState = 'start' -- This is used to keep track of the game state, whether it's in the start screen or playing.
 end
 
 function love.keypressed(key)
@@ -47,37 +57,16 @@ end
 
 function love.update(dt)
   -- Player 1 movement
-  addable = 0
   if love.keyboard.isDown("w") then
-    if player1Y <= -2 then
-      addable = player1Y
-    else
-      addable = player1Y - (PADDLE_SPEED * dt)
-    end
-    player1Y = addable
+    player1Y = math.max(0, player1Y - (PADDLE_SPEED * dt))
   elseif love.keyboard.isDown("s") then
-    if player1Y >= 221 then
-      addable = player1Y
-    else
-      addable = player1Y + (PADDLE_SPEED * dt)
-    end
-    player1Y = addable
+    player1Y = math.min(VIRTUAL_WINDOW_HEIGHT - 20, player1Y + (PADDLE_SPEED * dt))
   end
   -- Player 2 movement
   if love.keyboard.isDown("up") then
-    if player2Y <= -2 then
-      addable = player2Y
-    else
-      addable = player2Y - (PADDLE_SPEED * dt)
-    end
-    player2Y = addable
+    player2Y = math.max(0, player2Y - (PADDLE_SPEED * dt))
   elseif love.keyboard.isDown("down") then
-    if player2Y >= 221 then
-      addable = player2Y
-    else
-      addable = player2Y + (PADDLE_SPEED * dt)
-    end
-    player2Y = addable
+    player2Y = math.min(VIRTUAL_WINDOW_HEIGHT - 20, player2Y + (PADDLE_SPEED * dt))
   end
 
 end
