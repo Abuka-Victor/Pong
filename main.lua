@@ -1,4 +1,7 @@
 push = require('push')
+Class = require('class')
+require('Paddle')
+require('Ball')
 
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
@@ -13,6 +16,7 @@ function love.load()
   -- making it look pixelated since the goal is to make it look retro.
 
   math.randomseed(os.time()) -- This is used to seed the random number generator with the current time.
+  love.window.setTitle("Pong")
 
   smallFont = love.graphics.newFont('font.ttf', 8)
 
@@ -20,22 +24,16 @@ function love.load()
 
   push:setupScreen(VIRTUAL_WINDOW_WIDTH, VIRTUAL_WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
     fullscreen = false,
-    resizable = false,
+    resizable = true,
     vsync = true
   })
 
   player_1_score = 0
   player_2_score = 0
 
-  -- Paddle positions
-  player1Y = 30
-  player2Y = VIRTUAL_WINDOW_HEIGHT - 50
-
-  ballX = VIRTUAL_WINDOW_WIDTH / 2 - 2
-  ballY = VIRTUAL_WINDOW_HEIGHT / 2 - 2
-
-  ballDX = math.random(2) == 1 and 100 or -100 -- randomly set the direction of the ball
-  ballDY = math.random(-50, 50) -- randomly set the vertical direction of the ball
+  ball = Ball( VIRTUAL_WINDOW_WIDTH / 2 - 2,  VIRTUAL_WINDOW_HEIGHT / 2 - 2, 4, 4)
+  player1 = Paddle(10, 30, 5, 20)
+  player2 = Paddle(VIRTUAL_WINDOW_WIDTH - 10, VIRTUAL_WINDOW_HEIGHT - 50, 5, 20)
 
   -- we transitioned to using the push library for window management to help
   -- with scaling and resolution management, it kind of zooms in to the virtual resolution but
@@ -58,37 +56,38 @@ function love.keypressed(key)
       gameState = "play"
     else
       gameState = "start"
-      ballX = VIRTUAL_WINDOW_WIDTH / 2 - 2
-      ballY = VIRTUAL_WINDOW_HEIGHT / 2 - 2
-
-      ballDX = math.random(2) == 1 and 100 or -100
-      ballDY = math.random(-50, 50) * 1.5
+      ball:reset()
     end
   end
-  if key == "space" then
-    ballX = VIRTUAL_WINDOW_WIDTH / 2 - 2
-    ballY = VIRTUAL_WINDOW_HEIGHT / 2 - 2
-  end
+end
+
+function love.resize(w, h)
+  push:resize(w, h)
 end
 
 function love.update(dt)
   -- Player 1 movement
   if love.keyboard.isDown("w") then
-    player1Y = math.max(0, player1Y - (PADDLE_SPEED * dt))
+    player1.dy = -PADDLE_SPEED
   elseif love.keyboard.isDown("s") then
-    player1Y = math.min(VIRTUAL_WINDOW_HEIGHT - 20, player1Y + (PADDLE_SPEED * dt))
+    player1.dy = PADDLE_SPEED
+  else
+    player1.dy = 0
   end
   -- Player 2 movement
   if love.keyboard.isDown("up") then
-    player2Y = math.max(0, player2Y - (PADDLE_SPEED * dt))
+    player2.dy = -PADDLE_SPEED
   elseif love.keyboard.isDown("down") then
-    player2Y = math.min(VIRTUAL_WINDOW_HEIGHT - 20, player2Y + (PADDLE_SPEED * dt))
+    player2.dy = PADDLE_SPEED
+  else 
+    player2.dy = 0
   end
 
   -- Ball movement
   if gameState == "play" then
-    ballX = ballX + ballDX * dt
-    ballY = ballY + ballDY * dt
+    ball:update(dt)
+    player1:update(dt)
+    player2:update(dt)
   end
 end
 
@@ -110,10 +109,10 @@ function love.draw()
   love.graphics.print(tostring(player_2_score), VIRTUAL_WINDOW_WIDTH / 2 + 50, 15)
 
   -- Paddle 1
-  love.graphics.rectangle("fill", 10, player1Y, 5, 20)
+  player1:render()
   -- Paddle 2
-  love.graphics.rectangle("fill", VIRTUAL_WINDOW_WIDTH - 10, player2Y, 5, 20)
+ player2:render()
   -- Ball
-  love.graphics.rectangle("fill", ballX, ballY, 4, 4)
+  ball:render()
   push:apply('end')
 end
