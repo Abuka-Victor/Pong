@@ -23,6 +23,14 @@ function Ball:update(dt)
   self.y = self.y + self.dy * dt
 end
 
+function Ball:collides(paddle)
+  if self.x + self.width > paddle.x and self.x < paddle.x + paddle.width and
+     self.y + self.height > paddle.y and self.y < paddle.y + paddle.height then
+    return true
+  end
+  return false
+end
+
 function  Ball:render()
   love.graphics.setColor(1, 1, 1, 1) -- Set color to white
   love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
