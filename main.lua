@@ -25,6 +25,12 @@ function love.load()
 
   bigFont = love.graphics.newFont("font.ttf", 40)
 
+  sound = {
+    wallHit = love.audio.newSource("wallHit.wav", "static"),
+    score = love.audio.newSource("score.wav", "static"),
+    paddleHit = love.audio.newSource("paddleHit.wav", "static")
+  }
+
   push:setupScreen(VIRTUAL_WINDOW_WIDTH, VIRTUAL_WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
     fullscreen = false,
     resizable = true,
@@ -108,6 +114,7 @@ function love.update(dt)
   if gameState == "play" then
 
     if ball:collides(player1) then
+      love.audio.play(sound.paddleHit)
       ball.dx = -ball.dx * 1.03
       ball.x = player1.x + player1.width
 
@@ -119,6 +126,7 @@ function love.update(dt)
     end
 
     if ball:collides(player2) then
+      love.audio.play(sound.paddleHit)
       ball.dx = -ball.dx * 1.03
       ball.x = player2.x - ball.width
 
@@ -131,6 +139,7 @@ function love.update(dt)
 
     -- Player 2 Scores 
     if ball.x < 0 then
+      love.audio.play(sound.score)
       player_2_score = player_2_score + 1
       SERVER = 1
       gameState = "serve"
@@ -143,6 +152,7 @@ function love.update(dt)
     end
     -- Player 1 scores
     if ball.x > VIRTUAL_WINDOW_WIDTH then
+      love.audio.play(sound.score)
       player_1_score = player_1_score + 1
       SERVER = 2
       gameState = "serve"
@@ -155,10 +165,12 @@ function love.update(dt)
     end
 
     if ball.y < 0 then
+      love.audio.play(sound.wallHit)
       ball.y = 0
       ball.dy = -ball.dy
     end
     if ball.y > VIRTUAL_WINDOW_HEIGHT then
+      love.audio.play(sound.wallHit)
       ball.y = VIRTUAL_WINDOW_HEIGHT
       ball.dy = -ball.dy
     end
